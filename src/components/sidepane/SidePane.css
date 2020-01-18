@@ -1,0 +1,16 @@
+#SidePane {
+  flex: 1;
+  background: #232939;
+  height: 100vh;
+  border-radius: 0;
+}
+
+.ui.button {
+  margin: 1em auto;
+}
+
+#sub-menu {
+  position: absolute;
+  bottom: 0;
+  width: 20%;
+}
