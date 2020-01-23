@@ -31,7 +31,6 @@ function App() {
             <section id="content">
               <Route exact path="/" component={CustomerBanner}/>
               <Route path="/lookup/:tag" component={CustomerBanner}/>
-              <Route exact path="/" component={HomePage}/>
               <Route path="/lookup/:tag" component={HomePage}/>
             </section>
           </div>

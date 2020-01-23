@@ -2,7 +2,7 @@
 import React from 'react'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
-import { selectCustomer,setPredefinedMessages, setSavedTags } from '../../actions'
+import { selectCustomer,setPredefinedMessages, setSavedTags, setLoading } from 'actions'
 import { Menu, Button, Header, Input, Icon } from 'semantic-ui-react';
 import './SidePane.css';
 
@@ -14,12 +14,16 @@ class SidePane extends React.Component {
         search: props.match.params.tag,
         savedTags: [],
         recentTags: [],
-        loading: false
+        loading: props.loading
       };
 
       this.handleChange = this.handleChange.bind(this);
       this.searchTag = this.searchTag.bind(this);
-      this.changeUrl = this.changeUrl.bind(this);
+      this.clearUser = this.clearUser.bind(this);
+
+      if (props.match.params.tag) {
+        this.searchTag(props.match.params.tag);
+      }
   }
 
   handleChange(event) {
@@ -32,48 +36,42 @@ class SidePane extends React.Component {
     });
   }
 
-  componentWillReceiveProps(newProps) {
-    if (newProps.match && newProps.match.params.tag !== newProps.customer.currentplan) {
-      if (this.props.customer.searchTerm && !newProps.customer.searchTerm) {
-
-      } else if (newProps.match.params.tag !== newProps.customer.searchTerm) {
-        this.searchTag({
-          target: {
-            value: newProps.match.params.tag
-          }
-        })
-      }
-    }
-  }
-
   searchTag(e) {
-    this.props.selectCustomer({searchTerm: this.state.query});
+    let searchTerm = e.target ? this.state.query : e;
+    window.location.hash = `#/lookup/${searchTerm}`;
+    this.props.setLoading(true);
+
+    fetch(`https://pdzhlkjzid.execute-api.us-east-1.amazonaws.com/dev/user/get?searchTerm=${searchTerm}`)
+    .then(res => res.json())
+    .then(
+      (result) => {
+        this.setState({
+          isLoaded: true,
+          items: result.user
+        });
+
+        this.props.selectCustomer(result.user)
+        this.props.setLoading(false);
+      },
+      (error) => {
+        this.setState({
+          isLoaded: true,
+          error
+        });
+        this.props.setLoading(false);
+      }
+    );
   }
 
-  changeUrl(e) {
-    let tag = null
-
-    if (e.type === 'keydown') {
-      if (e.key === 'Enter') tag = this.state.query;
-    } else {
-      tag = e.target.value ? e.target.value : e.target.innerText !== "Search" ? e.target.innerText : this.state.query;
-    }
-
-    if (tag) {
-      window.location.hash = `#/lookup/${tag}`;
-    } else if (e.type === 'keydown') {
-      // Do nothing
-    } else {
-      this.props.selectCustomer({})
-      window.location.hash=`#/`;
-    }
-
+  clearUser() {
+    window.location.hash = `#/`;
+    this.props.selectCustomer(null)
   }
 
   render() {
       return (
         <Menu id="SidePane" inverted vertical>
-          <Menu.Item>
+          <Menu.Item onClick={this.clearUser}>
             <Header inverted>
               Support Dashboard
               <Header sub>React App</Header>
@@ -87,16 +85,26 @@ class SidePane extends React.Component {
             <Button fluid>Find tag by customer info</Button>
           </Menu.Item>
 
+          <Menu.Item>
+            <Header inverted>Saved Customers</Header>
+          </Menu.Item>
+
+          <Menu.Item link onClick={() => {this.searchTag('malik')}}>
+            Malik
+          </Menu.Item>
+
+          <Menu.Item link onClick={() => {this.searchTag('sam')}}>
+            Sam
+          </Menu.Item>
+
+          <Menu.Item link onClick={() => {this.searchTag('jess')}}>
+            Jess
+          </Menu.Item>
 
 
           <div id="sub-menu">
             <Menu.Item onClick={()=> {}}>
               Malik Harrison
-            </Menu.Item>
-
-            <Menu.Item onClick={()=> {}}>
-              Log In
-              <Icon name='sign in' />
             </Menu.Item>
           </div>
         </Menu>
@@ -108,13 +116,15 @@ class SidePane extends React.Component {
 const mapStateToProps = state => ({
     user: state.user,
     customer: state.customer,
-    savedTags: state.savedTags
+    savedTags: state.savedTags,
+    loading: state.loading
 });
 
 const mapDispatchToProps = dispatch => ({
     selectCustomer: bindActionCreators(selectCustomer, dispatch),
     setPredefinedMessages: bindActionCreators(setPredefinedMessages, dispatch),
-    setSavedTags: bindActionCreators(setSavedTags, dispatch)
+    setSavedTags: bindActionCreators(setSavedTags, dispatch),
+    setLoading: bindActionCreators(setLoading, dispatch)
 });
 
 export default connect(

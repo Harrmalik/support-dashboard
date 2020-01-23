@@ -24,6 +24,15 @@ const user = (state = userData, action) => {
     }
 }
 
+const loading = (state = false, action) => {
+    switch (action.type) {
+      case 'SET_LOADING':
+            return action.loading
+      default:
+        return state
+    }
+}
+
 const savedTags = (state = [], action) => {
     switch (action.type) {
       case 'SET_SAVED_TAGS':
@@ -64,7 +73,8 @@ const rootReducer = combineReducers({
     user,
     customer,
     predefinedMessages,
-    savedTags
+    savedTags,
+    loading
 })
 
 export default rootReducer

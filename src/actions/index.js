@@ -17,3 +17,8 @@ export const selectCustomer = (customer) => ({
     type: 'SELECT_CUSTOMER',
     customer
 })
+
+export const setLoading = (loading) => ({
+    type: 'SET_LOADING',
+    loading
+})
